@@ -14,25 +14,71 @@ pub fn read(path: &str) -> String{
 
 
 pub fn step01() {
+    enum Operator {
+        Equal, Add, Sub, END,
+        UNDEFINED,
+        WHITESPACE, NEWLINE
+    }
+    let mut operator = HashMap::new();
+    operator.insert("=", Operator::Equal);
+    operator.insert("+", Operator::Add);
+    operator.insert("-", Operator::Sub);
+    operator.insert(";", Operator::END);
+    operator.insert(" ", Operator::WHITESPACE);
+    operator.insert("\n", Operator::NEWLINE);
+    operator.insert("\r\n", Operator::NEWLINE);
+    operator.insert("UNDEFINED", Operator::UNDEFINED);
+
+
+
+
+    let text_size_lim = 128;
+
+    // contentの定義
     let content = read("src/raw/step01.phenom");
 
     let mut namespace = HashMap::new();
+
     for i in 1..10 {
         namespace.insert(format!("0{}", i), i);
     } // テクニック#1
-    let mut txt: Vec<char> = content.chars().collect();
-    txt.extend(Vec::with_capacity(1024 - txt.len()));
-    for pc in 1..txt.len(){ // Stringから1文字ずつ取得
-        if txt[pc] == "\n" || txt[pc] == "\r" || txt[pc] == " " || txt[pc] == "\t" || txt[pc] == ";" {
-            continue;
-        } else if txt[pc + 1] == "=" && txt[pc + 3] == ";" { // 代入
-            namespace[txt[pc]] = namespace[txt[pc + 2]];
-        } else if txt[pc + 1] == "=" && txt[pc + 3] == "+" && txt[pc + 5] == ";" { // 加算
-            namespace[txt[pc]] = namespace[txt[pc + 2]] + namespace[txt[pc + 4]];
-        } else if txt[pc + 1] == "=" && txt[pc + 3] == "-" && txt[pc + 5] == ";" { // 減算
-            namespace[txt[pc]] = namespace[txt[pc + 2]] - namespace[txt[pc + 4]];
-        } else if txt[pc] == "p" && txt[pc + 1] == "r" && txt[pc + 5] == " " { // pr*** X (print x)
-            println!("{}", txt[pc + 6]);
-        }
+
+    let mut content_chars: Vec<char> = content.chars().collect();
+    for _i in 0..(text_size_lim-content_chars.len()){
+        content_chars.extend(" ".chars());
     }
+
+    for i in 0..text_size_lim {
+        // 1文字ずつStringとして読み込む
+        let checking_str = content_chars[i].to_string();
+
+        // もし演算子として登録されていたら、
+        if operator.contains_key(&*checking_str) {
+            match operator[&*checking_str] {
+                Operator::END => {
+                    println!("<END>");
+                },
+                Operator::Add => {
+                    println!("+");
+                },
+                Operator::Sub => {
+                    println!("-");
+                },
+                Operator::Equal => {
+                    println!("=");
+                },
+                Operator::WHITESPACE => {
+                },
+                Operator::NEWLINE => {},
+                Operator::UNDEFINED => {},
+            }
+        } else {
+            // 演算子以外だったら
+            print!("{} | bytes: [", content_chars[i]);
+            for b in content_chars[i].to_string().bytes(){
+                print!("{}, ", b);
+            }
+            println!("]");
+        }
+    };
 }
