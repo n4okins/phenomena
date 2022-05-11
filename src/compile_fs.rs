@@ -17,7 +17,7 @@ pub fn step01() {
     enum Operator {
         Equal, Add, Sub, END,
         UNDEFINED,
-        WHITESPACE, NEWLINE
+        WHITESPACE, LINEFEED, CARRIAGERETURN
     }
     let mut operator = HashMap::new();
     operator.insert("=", Operator::Equal);
@@ -25,14 +25,9 @@ pub fn step01() {
     operator.insert("-", Operator::Sub);
     operator.insert(";", Operator::END);
     operator.insert(" ", Operator::WHITESPACE);
-    operator.insert("\n", Operator::NEWLINE);
-    operator.insert("\r\n", Operator::NEWLINE);
+    operator.insert("\n", Operator::LINEFEED);
+    operator.insert("\r", Operator::CARRIAGERETURN);
     operator.insert("UNDEFINED", Operator::UNDEFINED);
-
-
-
-
-    let text_size_lim = 128;
 
     // contentの定義
     let content = read("src/raw/step01.phenom");
@@ -43,42 +38,37 @@ pub fn step01() {
         namespace.insert(format!("0{}", i), i);
     } // テクニック#1
 
-    let mut content_chars: Vec<char> = content.chars().collect();
-    for _i in 0..(text_size_lim-content_chars.len()){
-        content_chars.extend(" ".chars());
-    }
-
-    for i in 0..text_size_lim {
-        // 1文字ずつStringとして読み込む
-        let checking_str = content_chars[i].to_string();
+    for c in content.chars() {
+        let checking_string = c.to_string();
 
         // もし演算子として登録されていたら、
-        if operator.contains_key(&*checking_str) {
-            match operator[&*checking_str] {
+        if operator.contains_key(&*checking_string) {
+            match operator[&*checking_string] {
                 Operator::END => {
-                    println!("<END>");
+                    println!("<_END_>");
                 },
                 Operator::Add => {
-                    println!("+");
+                    println!("<ADD>");
                 },
                 Operator::Sub => {
-                    println!("-");
+                    println!("<SUB>");
                 },
                 Operator::Equal => {
-                    println!("=");
+                    println!("<EQL>");
                 },
                 Operator::WHITESPACE => {
+                    println!("<SPACE>");
                 },
-                Operator::NEWLINE => {},
+                Operator::LINEFEED => {
+                    println!("<LF>");
+                },
+                Operator::CARRIAGERETURN => {
+                    println!("<CR>");
+                },
                 Operator::UNDEFINED => {},
             }
         } else {
-            // 演算子以外だったら
-            print!("{} | bytes: [", content_chars[i]);
-            for b in content_chars[i].to_string().bytes(){
-                print!("{}, ", b);
-            }
-            println!("]");
+            println!("{}", checking_string);
         }
     };
 }
